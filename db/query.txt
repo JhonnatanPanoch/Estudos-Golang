@@ -1,0 +1,7 @@
+CREATE DATABASE devbook;
+CREATE TABLE "usuarios" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"nome"	varchar(50) NOT NULL,
+	"email"	varchar(50) NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+)
