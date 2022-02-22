@@ -126,3 +126,28 @@ func (u Usuarios) Excluir(idUsuario uint64) error {
 
 	return nil
 }
+
+// BuscarPorEmail traz o usuario que atendam um filtro de email
+func (u Usuarios) BuscarPorEmail(email string) (modelos.Usuario, error) {
+	var usuario = modelos.Usuario{}
+	linhas, erro := u.db.Query("select * from usuarios where email = ?", email)
+	if erro != nil {
+		return usuario, erro
+	}
+	defer linhas.Close()
+
+	if linhas.Next() {
+		if erro := linhas.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Senha,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return usuario, erro
+		}
+	}
+
+	return usuario, nil
+}
