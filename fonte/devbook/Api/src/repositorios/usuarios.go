@@ -36,3 +36,23 @@ func (u Usuarios) Criar(usuario modelos.Usuario) (uint64, error) {
 
 	return uint64(idInserido), nil
 }
+
+func (u Usuarios) BuscarPorNomeOuNick(nomeOuNick string) ([]modelos.Usuario, error) {
+	linhas, erro := u.db.Query("select * from usuarios where nome = ? or nick = ?", nomeOuNick, nomeOuNick)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var usuarios []modelos.Usuario
+	for linhas.Next() {
+		var usuario modelos.Usuario
+		if erro := linhas.Scan(&usuario.Id, &usuario.Nome, &usuario.Nick, &usuario.Email, &usuario.Senha, &usuario.CriadoEm); erro != nil {
+			return nil, erro
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, nil
+}
