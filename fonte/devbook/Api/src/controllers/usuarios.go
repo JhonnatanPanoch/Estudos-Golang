@@ -6,6 +6,7 @@ import (
 	"api/src/repositorios"
 	"api/src/respostas"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -96,7 +97,44 @@ func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
 }
 
 func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
-	rw.Write([]byte("Atualizando usuário"))
+	parametros := mux.Vars(r)
+
+	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+	}
+
+	requisicao, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusUnprocessableEntity, erro)
+	}
+
+	var usuario modelos.Usuario
+	if erro := json.Unmarshal(requisicao, &usuario); erro != nil {
+		respostas.Erro(rw, http.StatusUnprocessableEntity, erro)
+	}
+
+	fmt.Println(usuario)
+
+	if erro = usuario.Preparar("edicao"); erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.CriarRepositorioUsuarios(db)
+	if erro := repositorio.Alterar(idUsuario, usuario); erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	respostas.JSON(rw, http.StatusNoContent, nil)
 }
 
 func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {

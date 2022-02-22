@@ -90,3 +90,24 @@ func (u Usuarios) BuscarPorId(id uint64) (modelos.Usuario, error) {
 
 	return usuario, erro
 }
+
+// Alterar altera as informaçoes básicas de um usuário do banco de dados pelo seu id
+func (u Usuarios) Alterar(idUsuario uint64, usuario modelos.Usuario) error {
+	var query = `UPDATE usuarios SET
+					nome = ?, 
+					nick = ?, 
+					email = ?
+				WHERE id = ?;`
+	statement, erro := u.db.Prepare(query)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(usuario.Nome, usuario.Nick, usuario.Email, idUsuario)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}
