@@ -111,3 +111,18 @@ func (u Usuarios) Alterar(idUsuario uint64, usuario modelos.Usuario) error {
 
 	return nil
 }
+
+func (u Usuarios) Excluir(idUsuario uint64) error {
+	statement, erro := u.db.Prepare("DELETE FROM usuarios WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(idUsuario)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}

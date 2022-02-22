@@ -102,19 +102,20 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
 	if erro != nil {
 		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
 	}
 
 	requisicao, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		respostas.Erro(rw, http.StatusUnprocessableEntity, erro)
+		return
 	}
 
 	var usuario modelos.Usuario
 	if erro := json.Unmarshal(requisicao, &usuario); erro != nil {
 		respostas.Erro(rw, http.StatusUnprocessableEntity, erro)
+		return
 	}
-
-	fmt.Println(usuario)
 
 	if erro = usuario.Preparar("edicao"); erro != nil {
 		respostas.Erro(rw, http.StatusBadRequest, erro)
@@ -138,5 +139,26 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 }
 
 func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
-	rw.Write([]byte("Apagando usuário"))
+	parametros := mux.Vars(r)
+
+	fmt.Println(parametros)
+	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.CriarRepositorioUsuarios(db)
+	if erro := repositorio.Excluir(idUsuario); erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+	}
+
+	respostas.JSON(rw, http.StatusNoContent, nil)
 }
