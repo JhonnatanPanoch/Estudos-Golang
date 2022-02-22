@@ -9,4 +9,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.11
 )
 
-require golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+)

@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"api/src/autenticacao"
 	"api/src/banco"
 	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"api/src/seguranca"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -46,5 +48,12 @@ func Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, erro := autenticacao.CriarToken(usuarioSalvoNoBanco.Id)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	fmt.Println(token)
 	respostas.JSON(rw, http.StatusOK, usuarioSalvoNoBanco)
 }
