@@ -37,6 +37,7 @@ func (u Usuarios) Criar(usuario modelos.Usuario) (uint64, error) {
 	return uint64(idInserido), nil
 }
 
+// BuscarPorNomeOuNick traz todos os usuarios que atendam um filtro de nome ou nick
 func (u Usuarios) BuscarPorNomeOuNick(nomeOuNick string) ([]modelos.Usuario, error) {
 	linhas, erro := u.db.Query("select * from usuarios where nome = ? or nick = ?", nomeOuNick, nomeOuNick)
 	if erro != nil {
@@ -47,7 +48,14 @@ func (u Usuarios) BuscarPorNomeOuNick(nomeOuNick string) ([]modelos.Usuario, err
 	var usuarios []modelos.Usuario
 	for linhas.Next() {
 		var usuario modelos.Usuario
-		if erro := linhas.Scan(&usuario.Id, &usuario.Nome, &usuario.Nick, &usuario.Email, &usuario.Senha, &usuario.CriadoEm); erro != nil {
+		if erro := linhas.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Senha,
+			&usuario.CriadoEm,
+		); erro != nil {
 			return nil, erro
 		}
 
@@ -55,4 +63,30 @@ func (u Usuarios) BuscarPorNomeOuNick(nomeOuNick string) ([]modelos.Usuario, err
 	}
 
 	return usuarios, nil
+}
+
+// BuscarPorId traz um usuário do banco de dados pelo id.
+func (u Usuarios) BuscarPorId(id uint64) (modelos.Usuario, error) {
+	var usuario = modelos.Usuario{}
+
+	linhas, erro := u.db.Query("select * from usuarios where id = ?", id)
+	if erro != nil {
+		return usuario, erro
+	}
+	defer linhas.Close()
+
+	if linhas.Next() {
+		if erro = linhas.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Senha,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return usuario, erro
+		}
+	}
+
+	return usuario, erro
 }
