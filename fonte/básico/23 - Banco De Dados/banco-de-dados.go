@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/src/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -9,7 +10,7 @@ import (
 )
 
 func main() {
-	stringConexao := "./devbook.db"
+	stringConexao := config.StringConexao
 	db, erro := sql.Open("sqlite3", stringConexao)
 	if erro != nil {
 		log.Fatal(erro)
