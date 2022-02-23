@@ -66,3 +66,37 @@ func (p Publicacoes) BuscarPorId(publicacaoId uint64) (modelos.Publicacao, error
 
 	return publicacao, nil
 }
+
+func (p Publicacoes) Buscar(usuarioID uint64) ([]modelos.Publicacao, error) {
+
+	linhas, erro := p.db.Query(`
+		select distinct p.*, u.nick from publicacoes p 
+		inner join usuarios u on u.id = p.autor_id 
+		inner join seguidores s on p.autor_id = s.usuario_id 
+		where u.id = ? or s.seguidor_id = ?
+		order by 1 desc;`, usuarioID, usuarioID)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var publicacoes []modelos.Publicacao
+	for linhas.Next() {
+		var publicacao = modelos.Publicacao{}
+		if erro = linhas.Scan(
+			&publicacao.ID,
+			&publicacao.Titulo,
+			&publicacao.Conteudo,
+			&publicacao.AutorID,
+			&publicacao.Curtidas,
+			&publicacao.CriadaEm,
+			&publicacao.AutorNick,
+		); erro != nil {
+			return nil, erro
+		}
+
+		publicacoes = append(publicacoes, publicacao)
+	}
+
+	return publicacoes, nil
+}
