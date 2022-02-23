@@ -21,3 +21,14 @@ CREATE TABLE "seguidores" (
 	FOREIGN KEY("usuario_id") REFERENCES "usuarios"("id") ON DELETE CASCADE,
 	PRIMARY KEY("usuario_id","seguidor_id")
 );
+
+CREATE TABLE "publicacoes" (
+	"id"	INTEGER NOT NULL,
+	"titulo"	varchar(50) NOT NULL,
+	"conteudo"	varchar(300) NOT NULL,
+	"autor_id"	INTEGER NOT NULL,
+	"curtidas"	INTEGER NOT NULL DEFAULT 0,
+	"criadaEm"	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY("autor_id") REFERENCES "usuarios"("id") ON DELETE CASCADE,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
