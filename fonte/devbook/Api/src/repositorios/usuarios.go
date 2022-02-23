@@ -151,3 +151,21 @@ func (u Usuarios) BuscarPorEmail(email string) (modelos.Usuario, error) {
 
 	return usuario, nil
 }
+
+// Seguir permite que dois usuários se sigam
+func (u Usuarios) Seguir(idUsuario, idSeguidor uint64) error {
+
+	var query = `INSERT IGNORE INTO seguidores (usuario_id, seguidor_id) VALUES (?, ?)`
+	statement, erro := u.db.Prepare(query)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(idUsuario, idSeguidor)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}

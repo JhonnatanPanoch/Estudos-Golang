@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// CriarUsuario cria um novo usuário no banco de dados
 func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 	request, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
@@ -51,6 +52,7 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 	respostas.JSON(rw, http.StatusCreated, usuario)
 }
 
+// BuscarUsuarios obtém uma lista de usuarios do banco de dados pelo seu nome ou nick
 func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
 
@@ -71,6 +73,7 @@ func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 	respostas.JSON(rw, http.StatusOK, usuarios)
 }
 
+// BuscarUsuario obtém um usuario do banco de dados pelo seu id
 func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
 
@@ -97,6 +100,7 @@ func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
 	respostas.JSON(rw, http.StatusOK, usuario)
 }
 
+// AtualizarUsuario atualiza um usuario do banco de dados pelo seu id
 func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
 
@@ -150,6 +154,7 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 	respostas.JSON(rw, http.StatusNoContent, nil)
 }
 
+// DeletarUsuario apaga um usuario do banco de dados pelo seu id
 func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
 
@@ -180,6 +185,42 @@ func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	if erro := repositorio.Excluir(idUsuario); erro != nil {
 		respostas.Erro(rw, http.StatusBadRequest, erro)
+	}
+
+	respostas.JSON(rw, http.StatusNoContent, nil)
+}
+
+// SeguirUsuario permite que um usuário siga outro
+func SeguirUsuario(rw http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	seguidorId, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if idUsuario == seguidorId {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("não é possível seguir a própria conta"))
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+	db.Close()
+
+	repositorio := repositorios.CriarRepositorioUsuarios(db)
+	if erro := repositorio.Seguir(idUsuario, seguidorId); erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
 	}
 
 	respostas.JSON(rw, http.StatusNoContent, nil)
