@@ -11,6 +11,7 @@ import (
 var (
 	StringConexao = ""
 	Porta         = 0
+	Secret        []byte
 )
 
 // Vai carregar as variaveis de ambiente
@@ -27,4 +28,6 @@ func Carregar() {
 	}
 
 	StringConexao = os.Getenv("DB_ARQUIVO")
+
+	Secret = []byte(os.Getenv("SECRET_KEY"))
 }
