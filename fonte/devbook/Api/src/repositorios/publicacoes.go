@@ -41,7 +41,10 @@ func (p Publicacoes) Criar(publicacao modelos.Publicacao) (uint64, error) {
 func (p Publicacoes) BuscarPorId(publicacaoId uint64) (modelos.Publicacao, error) {
 	var publicacao = modelos.Publicacao{}
 
-	linhas, erro := p.db.Query("SELECT * FROM publicacoes WHERE id = ?", publicacaoId)
+	linhas, erro := p.db.Query(`
+	select p.*, u.nick from 
+	publicacoes p inner join usuarios u
+	on u.id = p.autor_id where p.id = ?`, publicacaoId)
 	if erro != nil {
 		return publicacao, erro
 	}
@@ -55,6 +58,7 @@ func (p Publicacoes) BuscarPorId(publicacaoId uint64) (modelos.Publicacao, error
 			&publicacao.AutorID,
 			&publicacao.Curtidas,
 			&publicacao.CriadaEm,
+			&publicacao.AutorNick,
 		); erro != nil {
 			return publicacao, erro
 		}
