@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"api/src/autenticacao"
 	"api/src/banco"
 	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -102,6 +104,17 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
 	if erro != nil {
 		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
+	}
+
+	idUsuarioLogado, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	if idUsuario != idUsuarioLogado {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("não é possível alterar outros usuários."))
 		return
 	}
 
