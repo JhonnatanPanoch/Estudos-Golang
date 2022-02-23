@@ -8,7 +8,6 @@ import (
 	"api/src/respostas"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -109,12 +108,12 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 
 	idUsuarioLogado, erro := autenticacao.ExtrairUsuarioID(r)
 	if erro != nil {
-		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		respostas.Erro(rw, http.StatusUnauthorized, erro)
 		return
 	}
 
 	if idUsuario != idUsuarioLogado {
-		respostas.Erro(rw, http.StatusForbidden, errors.New("não é possível alterar outros usuários."))
+		respostas.Erro(rw, http.StatusForbidden, errors.New("não é possível alterar outros usuários"))
 		return
 	}
 
@@ -154,10 +153,20 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
 
-	fmt.Println(parametros)
 	idUsuario, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
 	if erro != nil {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	idUsuarioLogado, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if idUsuario != idUsuarioLogado {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("não é possível apagar outros usuários"))
 		return
 	}
 
