@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // CriarPublicao efetua a criação de uma nova publicação
@@ -31,6 +34,11 @@ func CriarPublicao(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if erro = publicacao.Preparar(); erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
+	}
+
 	publicacao.AutorID = usuarioId
 
 	db, erro := banco.Conectar()
@@ -38,7 +46,7 @@ func CriarPublicao(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioPublicacoes(db)
 	idPublicacao, erro := repositorio.Criar(publicacao)
@@ -57,7 +65,29 @@ func BuscarPublicacacoes(rw http.ResponseWriter, r *http.Request) {
 
 // BuscarPublicacao traz uma única publicação
 func BuscarPublicacao(rw http.ResponseWriter, r *http.Request) {
+	var parametros = mux.Vars(r)
 
+	publicacaoId, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.CriarRepositorioPublicacoes(db)
+	publicacao, erro := repositorio.BuscarPorId(publicacaoId)
+	if erro != nil {
+		respostas.Erro(rw, http.StatusBadRequest, erro)
+		return
+	}
+
+	respostas.JSON(rw, http.StatusOK, publicacao)
 }
 
 // AtualizarPublicacao efetua a atualização de uma publicação
