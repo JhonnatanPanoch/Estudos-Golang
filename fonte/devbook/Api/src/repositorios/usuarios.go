@@ -169,3 +169,106 @@ func (u Usuarios) Seguir(idUsuario, idSeguidor uint64) error {
 
 	return nil
 }
+
+// PararDeSeguir permite que dois usuários parem de se seguir
+func (u Usuarios) PararDeSeguir(idUsuario, idSeguidor uint64) error {
+
+	var query = `DELETE FROM seguidores WHERE usuario_id = ? AND seguidor_id = ?`
+	statement, erro := u.db.Prepare(query)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(idUsuario, idSeguidor)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// BuscarSeguidores retorna uma lista de seguidores do usuário
+func (u Usuarios) BuscarSeguidores(id uint64) ([]modelos.Usuario, error) {
+
+	var query = `SELECT usu.*
+	FROM SEGUIDORES seg
+	LEFT JOIN usuarios usu ON usu.id = seg.seguidor_id
+	WHERE seg.usuario_id = ?`
+
+	linhas, erro := u.db.Query(query, id)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var usuarios []modelos.Usuario
+	for linhas.Next() {
+		var usuario = modelos.Usuario{}
+		if erro = linhas.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Senha,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return nil, erro
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, erro
+}
+
+// BuscarSeguindo retorna uma lista de usuários que está seguindo
+func (u Usuarios) BuscarSeguindo(id uint64) ([]modelos.Usuario, error) {
+
+	var query = `SELECT usu.* 
+	FROM usuarios usu 
+	INNER JOIN seguidores seg ON usu.id = seg.usuario_id
+	WHERE seg.seguidor_id = ?`
+
+	linhas, erro := u.db.Query(query, id)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var usuarios []modelos.Usuario
+	for linhas.Next() {
+		var usuario = modelos.Usuario{}
+		if erro = linhas.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Senha,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return nil, erro
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, erro
+}
+
+// AtualizarSenha atualiza a senha criptografada de um usuário por id.
+func (u Usuarios) AtualizarSenha(id uint64, novaSenha string) error {
+	var query = `UPDATE usuarios SET senha = ? WHERE id = ?;`
+	statement, erro := u.db.Prepare(query)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(novaSenha, id)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}
