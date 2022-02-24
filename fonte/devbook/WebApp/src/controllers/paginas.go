@@ -3,11 +3,13 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"strconv"
 	"webapp/src/config"
+	"webapp/src/cookies"
 	"webapp/src/models"
 	"webapp/src/requisicoes"
+	"webapp/src/respostas"
 	"webapp/src/utils"
 )
 
@@ -28,16 +30,29 @@ func CarregarPaginaPrincipal(rw http.ResponseWriter, r *http.Request) {
 	if erro != nil {
 		fmt.Println(erro)
 	}
+	defer resp.Body.Close()
 
-	corpoResposta, erro := ioutil.ReadAll(resp.Body)
-	if erro != nil {
-		fmt.Println(erro)
+	if resp.StatusCode >= 400 {
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
 	}
 
 	var publicacoes []models.Publicacao
-	if erro = json.Unmarshal(corpoResposta, &publicacoes); erro != nil {
-		fmt.Println(erro)
+	if erro = json.NewDecoder(resp.Body).Decode(&publicacoes); erro != nil {
+		respostas.JSON(rw, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
 	}
 
-	utils.ExecutarTemplate(rw, "home.html", resp)
+	cookie, _ := cookies.Ler(r)
+	usuarioId, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	var dados = struct {
+		Publicacoes []models.Publicacao
+		UsuarioID   uint64
+	}{
+		Publicacoes: publicacoes,
+		UsuarioID:   usuarioId,
+	}
+
+	utils.ExecutarTemplate(rw, "home.html", dados)
 }
