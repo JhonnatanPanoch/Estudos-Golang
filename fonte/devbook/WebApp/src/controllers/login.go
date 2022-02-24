@@ -31,10 +31,16 @@ func FazerLogin(rw http.ResponseWriter, r *http.Request) {
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeDeErro(rw, response)
+		return
+	}
+
 	var dadosAutenticacao models.DadosAutenticacao
 
-	if erro = json.NewDecoder(r.Body).Decode(&dadosAutenticacao); erro != nil {
+	if erro = json.NewDecoder(response.Body).Decode(&dadosAutenticacao); erro != nil {
 		respostas.JSON(rw, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
+		return
 	}
 
 	respostas.JSON(rw, http.StatusOK, nil)
