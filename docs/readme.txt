@@ -40,3 +40,4 @@ instalações
 - mux: 	go get github.com/gorilla/mux
 - sqlite3: 	go get github.com/mattn/go-sqlite3
 - godotenv  go get github.com/joho/godotenv
+- cookies   go get github.com/gorilla/securecookie
