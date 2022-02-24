@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // Login é resposável por autenticar um usuario na aplicação
@@ -53,6 +54,7 @@ func Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rw.Write([]byte(token))
-	//respostas.JSON(rw, http.StatusOK, usuarioSalvoNoBanco)
+	usuarioId := strconv.FormatUint(usuarioSalvoNoBanco.Id, 10)
+
+	respostas.JSON(rw, http.StatusOK, modelos.DadosAutenticacao{Id: usuarioId, Token: token})
 }
