@@ -14,3 +14,7 @@ func CarregarLogin(rw http.ResponseWriter, r *http.Request) {
 func CarregarPaginaCadastroUsuario(rw http.ResponseWriter, r *http.Request) {
 	utils.ExecutarTemplate(rw, "cadastro.html", nil)
 }
+
+func CarregarPaginaPrincipal(rw http.ResponseWriter, r *http.Request) {
+	utils.ExecutarTemplate(rw, "home.html", nil)
+}
