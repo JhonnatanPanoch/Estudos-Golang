@@ -3,6 +3,7 @@ package repositorios
 import (
 	"api/src/modelos"
 	"database/sql"
+	"fmt"
 )
 
 // Publicacoes representa um repositorio de publicações
@@ -69,12 +70,13 @@ func (p Publicacoes) BuscarPorId(publicacaoId uint64) (modelos.Publicacao, error
 
 func (p Publicacoes) Buscar(usuarioID uint64) ([]modelos.Publicacao, error) {
 
+	fmt.Println(usuarioID)
 	linhas, erro := p.db.Query(`
 		select distinct p.*, u.nick from publicacoes p 
 		inner join usuarios u on u.id = p.autor_id 
-		inner join seguidores s on p.autor_id = s.usuario_id 
+		inner join seguidores s on p.autor_id = s.usuario_id or p.autor_id = ?
 		where u.id = ? or s.seguidor_id = ?
-		order by 1 desc;`, usuarioID, usuarioID)
+		order by 1 desc;`, usuarioID, usuarioID, usuarioID)
 	if erro != nil {
 		return nil, erro
 	}

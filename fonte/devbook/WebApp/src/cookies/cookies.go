@@ -1,7 +1,6 @@
 package cookies
 
 import (
-	"fmt"
 	"net/http"
 	"webapp/src/config"
 
@@ -23,7 +22,6 @@ func Salvar(rw http.ResponseWriter, id, token string) error {
 
 	dadosCodificados, erro := s.Encode("dados", dados)
 	if erro != nil {
-		fmt.Println(erro)
 		return erro
 	}
 
