@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"webapp/src/config"
 	"webapp/src/cookies"
 	"webapp/src/models"
@@ -95,4 +96,32 @@ func CarregarPaginaDeAtualizacaoDePublicacao(w http.ResponseWriter, r *http.Requ
 	}
 
 	utils.ExecutarTemplate(w, "atualizar-publicacao.html", publicacao)
+}
+
+func CarregarPaginaUsuarios(rw http.ResponseWriter, r *http.Request) {
+	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
+
+	url := fmt.Sprintf("%s/usuarios?usuario=%s", config.ApiUrl, nomeOuNick)
+
+	resp, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
+	if erro != nil {
+		fmt.Println(erro)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	var usuarios []models.Usuario
+	if erro = json.NewDecoder(resp.Body).Decode(&usuarios); erro != nil {
+		respostas.JSON(rw, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	fmt.Println(usuarios)
+
+	utils.ExecutarTemplate(rw, "usuarios.html", usuarios)
+
 }
