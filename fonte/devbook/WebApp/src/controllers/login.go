@@ -45,7 +45,6 @@ func FazerLogin(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if erro = cookies.Salvar(rw, dadosAutenticacao.Id, dadosAutenticacao.Token); erro != nil {
-		fmt.Println(erro)
 		respostas.JSON(rw, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}

@@ -38,7 +38,8 @@ func CarregarPaginaPrincipal(rw http.ResponseWriter, r *http.Request) {
 
 	resp, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
 	if erro != nil {
-		fmt.Println(erro)
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
 	}
 	defer resp.Body.Close()
 
@@ -105,7 +106,8 @@ func CarregarPaginaUsuarios(rw http.ResponseWriter, r *http.Request) {
 
 	resp, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
 	if erro != nil {
-		fmt.Println(erro)
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
 	}
 	defer resp.Body.Close()
 
@@ -119,8 +121,6 @@ func CarregarPaginaUsuarios(rw http.ResponseWriter, r *http.Request) {
 		respostas.JSON(rw, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}
-
-	fmt.Println(usuarios)
 
 	utils.ExecutarTemplate(rw, "usuarios.html", usuarios)
 
