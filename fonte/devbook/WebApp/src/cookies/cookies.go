@@ -2,6 +2,7 @@ package cookies
 
 import (
 	"net/http"
+	"time"
 	"webapp/src/config"
 
 	"github.com/gorilla/securecookie"
@@ -47,4 +48,14 @@ func Ler(r *http.Request) (map[string]string, error) {
 	}
 
 	return valores, nil
+}
+
+func Apagar(rw http.ResponseWriter) {
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "dados",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Unix(0, 0),
+	})
 }

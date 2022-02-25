@@ -52,3 +52,10 @@ func FazerLogin(rw http.ResponseWriter, r *http.Request) {
 
 	respostas.JSON(rw, http.StatusOK, nil)
 }
+
+func FazerLogout(rw http.ResponseWriter, r *http.Request) {
+	cookies.Apagar(rw)
+	CarregarLogin(rw, r)
+
+	//http.Redirect(rw, r, "/login", http.StatusTemporaryRedirect)
+}
