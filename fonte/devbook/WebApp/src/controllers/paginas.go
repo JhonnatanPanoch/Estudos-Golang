@@ -140,5 +140,16 @@ func CarregarPerfilDoUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respostas.JSON(rw, http.StatusOK, usuarioCompleto)
+	cookie, _ := cookies.Ler(r)
+	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	var data = struct {
+		Usuario         models.Usuario
+		UsuarioLogadoID uint64
+	}{
+		Usuario:         usuarioCompleto,
+		UsuarioLogadoID: idUsuarioLogado,
+	}
+
+	utils.ExecutarTemplate(rw, "usuario.html", data)
 }

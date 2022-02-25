@@ -216,7 +216,7 @@ func SeguirUsuario(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	if erro := repositorio.Seguir(idUsuario, seguidorId); erro != nil {
@@ -247,7 +247,7 @@ func PararDeSeguirUsuario(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	if erro := repositorio.PararDeSeguir(idUsuario, seguidorId); erro != nil {
@@ -272,7 +272,7 @@ func BuscarSeguidores(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	seguidores, erro := repositorio.BuscarSeguidores(idUsuario)
@@ -297,7 +297,7 @@ func BuscarSeguindo(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	seguidores, erro := repositorio.BuscarSeguindo(idUsuario)
@@ -346,7 +346,7 @@ func AtualizarSenha(rw http.ResponseWriter, r *http.Request) {
 		respostas.Erro(rw, http.StatusInternalServerError, erro)
 		return
 	}
-	db.Close()
+	defer db.Close()
 
 	repositorio := repositorios.CriarRepositorioUsuarios(db)
 	usuarioBanco, erro := repositorio.BuscarPorId(idUsuario)
