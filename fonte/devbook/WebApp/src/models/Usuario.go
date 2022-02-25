@@ -22,7 +22,6 @@ type Usuario struct {
 }
 
 func BuscarUsuarioCompleto(usuarioId uint64, r *http.Request) (Usuario, error) {
-
 	canalUsuario := make(chan Usuario)
 	canalSeguidores := make(chan []Usuario)
 	canalSeguindo := make(chan []Usuario)
@@ -70,7 +69,6 @@ func BuscarUsuarioCompleto(usuarioId uint64, r *http.Request) (Usuario, error) {
 
 			publicacoes = publicacoesCarregadas
 		}
-
 	}
 
 	usuario.Seguidores = seguidores
@@ -78,7 +76,6 @@ func BuscarUsuarioCompleto(usuarioId uint64, r *http.Request) (Usuario, error) {
 	usuario.Publicacoes = publicacoes
 
 	return usuario, nil
-
 }
 
 func BuscarusuarioCarregado(canal chan<- Usuario, usuarioId uint64, r *http.Request) {
@@ -114,6 +111,11 @@ func BuscarDadosSeguindo(canal chan<- []Usuario, usuarioId uint64, r *http.Reque
 		return
 	}
 
+	if usuarios == nil {
+		canal <- make([]Usuario, 0)
+		return
+	}
+
 	canal <- usuarios
 }
 
@@ -132,6 +134,11 @@ func BuscarDadosSeguidores(canal chan<- []Usuario, usuarioId uint64, r *http.Req
 		return
 	}
 
+	if usuarios == nil {
+		canal <- make([]Usuario, 0)
+		return
+	}
+
 	canal <- usuarios
 }
 
@@ -147,6 +154,11 @@ func BuscarDadosPublicacao(canal chan<- []Publicacao, usuarioId uint64, r *http.
 	var publicacoes []Publicacao
 	if erro = json.NewDecoder(response.Body).Decode(&publicacoes); erro != nil {
 		canal <- nil
+		return
+	}
+
+	if publicacoes == nil {
+		canal <- make([]Publicacao, 0)
 		return
 	}
 
