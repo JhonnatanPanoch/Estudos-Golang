@@ -124,3 +124,33 @@ func EditarUsuario(rw http.ResponseWriter, r *http.Request) {
 
 	respostas.JSON(rw, response.StatusCode, nil)
 }
+
+func AtualizarSenhaUsuario(rw http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	r.ParseForm()
+	senhas, erro := json.Marshal(map[string]string{
+		"nova":  r.FormValue("nova"),
+		"atual": r.FormValue("atual"),
+	})
+	if erro != nil {
+		respostas.JSON(rw, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/usuarios/%d/atualzar-senha", config.ApiUrl, idUsuarioLogado)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPost, url, bytes.NewBuffer(senhas))
+	if erro != nil {
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeDeErro(rw, response)
+		return
+	}
+
+	respostas.JSON(rw, response.StatusCode, nil)
+}

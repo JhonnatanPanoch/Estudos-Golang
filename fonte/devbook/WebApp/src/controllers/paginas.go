@@ -189,5 +189,5 @@ func CarregarPaginaEdicaoUsuario(rw http.ResponseWriter, r *http.Request) {
 }
 
 func CarregarPaginaAtualizarSenha(rw http.ResponseWriter, r *http.Request) {
-	utils.ExecutarTemplate(rw, "atualzar-senha.html", nil)
+	utils.ExecutarTemplate(rw, "atualizar-senha.html", nil)
 }
