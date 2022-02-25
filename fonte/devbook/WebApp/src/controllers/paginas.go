@@ -17,6 +17,13 @@ import (
 
 // CarregarLogin vai carregar a tela de login
 func CarregarLogin(rw http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+
+	if cookie["token"] != "" {
+		CarregarPaginaPrincipal(rw, r)
+		return
+	}
+
 	utils.ExecutarTemplate(rw, "login.html", nil)
 }
 
