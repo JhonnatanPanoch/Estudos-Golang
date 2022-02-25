@@ -133,5 +133,4 @@ function deletarPublicacao(evento) {
             Swal.fire("Ops...", "Erro ao excluir a publicação!", "error");
         });
     })
-
 }
