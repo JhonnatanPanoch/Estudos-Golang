@@ -34,10 +34,11 @@ Banco de dados
  - Instalação SQLITE no site: https://sqlitebrowser.org/
  - Driver sqlite3: go get https://github.com/mattn/go-sqlite3
 
-
-
 instalações 
 - mux: 	go get github.com/gorilla/mux
 - sqlite3: 	go get github.com/mattn/go-sqlite3
 - godotenv  go get github.com/joho/godotenv
 - cookies   go get github.com/gorilla/securecookie
+
+Formatação de data
+- Jan 2 15:04:05 2006 <-- 1 2 3 4 5 6

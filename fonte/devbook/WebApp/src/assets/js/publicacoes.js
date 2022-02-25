@@ -30,8 +30,11 @@ function curtirPublicacao(evento) {
     const publicacaoId = elementoClicado.closest('div').data('publicacao-id');
 
     elementoClicado.prop('disabled', true);
+
+    var url = `/publicacoes/${publicacaoId}/curtir`
+
     $.ajax({
-        url: `/publicacoes/${publicacaoId}/curtir`,
+        url: url,
         method: "POST"
     }).done(function() {
         const contadorDeCurtidas = elementoClicado.next('span');

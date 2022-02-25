@@ -35,7 +35,7 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-7">
                 {{ range .Publicacoes }}
-                    {{ if (eq .AutorID $.UsuarioID) }}
+                    {{ if (eq .AutorID $.UsuarioID) }} <!-- o "$ indica que a variavel nao está dentro do laco de repetiçao"-->
                          {{ template "publicacao-com-permissao" . }} <!--o "." define que está passando o modelo para dentro do template -->
                     {{ else }}
                         {{ template "publicacao-sem-permissao" . }}
