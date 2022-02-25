@@ -134,22 +134,60 @@ func CarregarPerfilDoUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usuarioCompleto, erro := models.BuscarUsuarioCompleto(usuarioId, r)
+	cookie, _ := cookies.Ler(r)
+	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	if idUsuarioLogado == usuarioId {
+		http.Redirect(rw, r, "/perfil", http.StatusTemporaryRedirect)
+		return
+	} else {
+		usuarioCompleto, erro := models.BuscarUsuarioCompleto(usuarioId, r)
+		if erro != nil {
+			respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+			return
+		}
+
+		var data = struct {
+			Usuario         models.Usuario
+			UsuarioLogadoID uint64
+		}{
+			Usuario:         usuarioCompleto,
+			UsuarioLogadoID: idUsuarioLogado,
+		}
+
+		utils.ExecutarTemplate(rw, "usuario.html", data)
+	}
+}
+
+func CarregarPerfilDoUsuarioLogado(rw http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	usuarioCompleto, erro := models.BuscarUsuarioCompleto(idUsuarioLogado, r)
 	if erro != nil {
 		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}
 
+	utils.ExecutarTemplate(rw, "perfil.html", usuarioCompleto)
+}
+
+func CarregarPaginaEdicaoUsuario(rw http.ResponseWriter, r *http.Request) {
 	cookie, _ := cookies.Ler(r)
 	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
 
-	var data = struct {
-		Usuario         models.Usuario
-		UsuarioLogadoID uint64
-	}{
-		Usuario:         usuarioCompleto,
-		UsuarioLogadoID: idUsuarioLogado,
+	canalUsuario := make(chan models.Usuario)
+	go models.BuscarDadosUsuario(canalUsuario, idUsuarioLogado, r)
+
+	usuario := <-canalUsuario
+	if usuario.Id == 0 {
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: "erro ao buscar dados do usuário"})
+		return
 	}
 
-	utils.ExecutarTemplate(rw, "usuario.html", data)
+	utils.ExecutarTemplate(rw, "editar-usuario.html", usuario)
+}
+
+func CarregarPaginaAtualizarSenha(rw http.ResponseWriter, r *http.Request) {
+	utils.ExecutarTemplate(rw, "atualzar-senha.html", nil)
 }

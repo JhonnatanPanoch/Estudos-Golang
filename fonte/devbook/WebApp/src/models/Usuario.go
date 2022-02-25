@@ -27,7 +27,7 @@ func BuscarUsuarioCompleto(usuarioId uint64, r *http.Request) (Usuario, error) {
 	canalSeguindo := make(chan []Usuario)
 	canalPublicacoes := make(chan []Publicacao)
 
-	go BuscarusuarioCarregado(canalUsuario, usuarioId, r)
+	go BuscarDadosUsuario(canalUsuario, usuarioId, r)
 	go BuscarDadosSeguidores(canalSeguidores, usuarioId, r)
 	go BuscarDadosSeguindo(canalSeguindo, usuarioId, r)
 	go BuscarDadosPublicacao(canalPublicacoes, usuarioId, r)
@@ -78,7 +78,7 @@ func BuscarUsuarioCompleto(usuarioId uint64, r *http.Request) (Usuario, error) {
 	return usuario, nil
 }
 
-func BuscarusuarioCarregado(canal chan<- Usuario, usuarioId uint64, r *http.Request) {
+func BuscarDadosUsuario(canal chan<- Usuario, usuarioId uint64, r *http.Request) {
 	url := fmt.Sprintf("%s/usuarios/%d", config.ApiUrl, usuarioId)
 	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
 	if erro != nil {

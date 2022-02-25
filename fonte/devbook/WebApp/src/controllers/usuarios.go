@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"webapp/src/config"
+	"webapp/src/cookies"
 	"webapp/src/requisicoes"
 	"webapp/src/respostas"
 
@@ -81,6 +82,37 @@ func SeguirUsuario(rw http.ResponseWriter, r *http.Request) {
 	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPost, url, nil)
 	if erro != nil {
 		respostas.JSON(rw, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeDeErro(rw, response)
+		return
+	}
+
+	respostas.JSON(rw, response.StatusCode, nil)
+}
+
+func EditarUsuario(rw http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+	idUsuarioLogado, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	r.ParseForm()
+	usuario, erro := json.Marshal(map[string]string{
+		"nome":  r.FormValue("nome"),
+		"email": r.FormValue("email"),
+		"nick":  r.FormValue("nick"),
+	})
+	if erro != nil {
+		respostas.JSON(rw, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	url := fmt.Sprintf("%s/usuarios/%d", config.ApiUrl, idUsuarioLogado)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPut, url, bytes.NewBuffer(usuario))
+	if erro != nil {
+		respostas.JSON(rw, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}
 	defer response.Body.Close()
